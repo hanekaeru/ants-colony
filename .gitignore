@@ -1,0 +1,11 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Datasource local storage ignored files
+/../../../../../../../../../../../:\Users\lumag\OneDrive\Bureau\FAC\M1\InfoRepartie\Projet\ants-colony\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+#IntelliJ files
+/.idea/
+ants-colony.iml
