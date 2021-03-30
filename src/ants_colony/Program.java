@@ -11,21 +11,21 @@ import jade.wrapper.AgentController;
 
 public class Program extends Agent {
 
-    /**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	int nb_nodes = 9; // 1 & 2 will always be information sources.
 	final static int NB_RECEVEURS = 2; // Il s'agit du nombre de noeuds qui n'auront pas de successeurs car ils contiennent l'informations.
-	final static int NB_AIGUILLEURS = 14; // Il s'agit du nombre d'arcs du graphe. 
-    final static int NB_COMPTEURS = 7; // 
-
-    private ArrayList<AID> receveurs = new ArrayList<>();
-    private ArrayList<AID> aiguilleurs = new ArrayList<>();
-    private ArrayList<AID> compteurs = new ArrayList<>();
-
-	private ArrayList<AID> nodes = new ArrayList<>();
+	final static int NB_AIGUILLEURS = 7; // Il s'agit du nombre d'arcs du graphe. 
+    final static int NB_COMPTEURS = 7; //
+	final static int NB_MOBILES = 1; // Nombre d'agents de recherche. On peut en ajouter autant qu'on veut mais pour les tests.
+	final static int NB_LANCEURS = 1;
+	
+    public static ArrayList<AID> receveurs = new ArrayList<>();
+    public static ArrayList<AID> aiguilleurs = new ArrayList<>();
+    public static ArrayList<AID> compteurs = new ArrayList<>();
+	public static ArrayList<AID> mobiles = new ArrayList<>();
+	public static ArrayList<AID> lanceurs = new ArrayList<>();
+	public static ArrayList<AID> agents = new ArrayList<>(); 
 
 	private transient Logger logger = Logger.getLogger(Program.class.getName());
 
@@ -33,7 +33,12 @@ public class Program extends Agent {
 	protected void setup() {
 		try {
 			logger.log(Level.INFO, " {} setting up", getLocalName());
+
 			createAgentsReceveurs();
+			createAgentsAiguilleurs();
+			createAgentsCompteurs();
+			createAgentsMobiles();
+			createAgentsLanceurs();
 
 			addBehaviour(new CyclicBehaviour(this) {
 				private static final long serialVersionUID = 1L;
@@ -62,7 +67,7 @@ public class Program extends Agent {
 				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentReceveur", null);
 				guest.start();
 				receveurs.add(new AID(localName, AID.ISLOCALNAME));
-				nodes.add(new AID(localName, AID.ISLOCALNAME));
+				agents.add(new AID(localName, AID.ISLOCALNAME));
 			}
 		} catch (Exception e) {
 			logger.log(Level.INFO, "Un problème est survenu lors de la mise en place des agents receveurs...", e);
@@ -83,13 +88,18 @@ public class Program extends Agent {
 				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentAiguilleur", null);
 				guest.start();
 				aiguilleurs.add(new AID(localName, AID.ISLOCALNAME));
-				nodes.add(new AID(localName, AID.ISLOCALNAME));
+				agents.add(new AID(localName, AID.ISLOCALNAME));
 			}
 		} catch (Exception e) {
 			logger.log(Level.INFO, "Un problème est survenu lors de la mise en place des agents aiguilleurs...", e);
 		}
 	}
 
+	/**
+	 * Création des agents compteurs. Ils sont au nombre de 7 dans une configuration de 9 noeuds. Ce sont ceux qui,
+	 * si un agent mobile atteint une source d'information et que celui-ci a été obligé de passer par l'agent compteur,
+	 * celui-ci va activer des "phéromones" afin d'indiquer que le chemin menant à la source d'informations est ici.
+	 */
 	protected void createAgentsCompteurs() {
 		logger.log(Level.INFO, "Creation {} agents compteurs.", NB_COMPTEURS);
 		PlatformController container = getContainerController();
@@ -99,10 +109,46 @@ public class Program extends Agent {
 				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentCompteur", null);
 				guest.start();
 				compteurs.add(new AID(localName, AID.ISLOCALNAME));
-				nodes.add(new AID(localName, AID.ISLOCALNAME));
+				agents.add(new AID(localName, AID.ISLOCALNAME));
 			}
 		} catch (Exception e) {
 			logger.log(Level.INFO, "Un problème est survenu lors de la mise en place des agents compteurs...", e);
+		}
+	}
+	
+	/**
+	 * Création des agents mobiles. Il n'y en a qu'un seul pour le moment, mais le code a été conçu de façon à pouvoir
+	 * en ajouter facilement. 
+	 */
+	protected void createAgentsMobiles() {
+		logger.log(Level.INFO, "Creation {} agents mobiles.", NB_MOBILES);
+		PlatformController container = getContainerController();
+		try {
+			for (int i = 1; i < NB_MOBILES + 1; i++) {
+				String localName = "agent_mobile_" + i + "_node";
+				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentMobile", null);
+				guest.start();
+				mobiles.add(new AID(localName, AID.ISLOCALNAME));
+				agents.add(new AID(localName, AID.ISLOCALNAME));
+			}
+		} catch (Exception e) {
+			logger.log(Level.INFO, "Un problème est survenu lors de la mise en place des agents mobiles...", e);
+		}
+	}
+
+	protected void createAgentsLanceurs() {
+		logger.log(Level.INFO, "Creation {} agents lanceurs.", NB_LANCEURS);
+		PlatformController container = getContainerController();
+		try {
+			for (int i = 1; i < NB_LANCEURS + 1; i++) {
+				String localName = "agent_lanceur_" + i + "_node";
+				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentLanceur", null);
+				guest.start();
+				lanceurs.add(new AID(localName, AID.ISLOCALNAME));
+				agents.add(new AID(localName, AID.ISLOCALNAME));
+			}
+		} catch (Exception e) {
+			logger.log(Level.INFO, "Un problème est survenu lors de la mise en place des agents lanceurs...", e);
 		}
 	}
 	

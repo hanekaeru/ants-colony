@@ -16,7 +16,6 @@ public class AgentReceveur extends Agent {
 			addBehaviour(new OneShotBehaviour(this) {
 				private static final long serialVersionUID = 1L;
 				public void action() {
-					System.out.println("Agent " + getLocalName() + " ready.");
 				}
 			});
 		} catch (Exception e) {

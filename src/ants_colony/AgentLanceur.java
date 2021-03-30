@@ -1,9 +1,11 @@
 package src.ants_colony;
 
+import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
-import java.awt.Color;
-import java.awt.Graphics;
+import jade.core.behaviours.*;
+import jade.lang.acl.ACLMessage;
+
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,15 +17,29 @@ public class AgentLanceur extends Agent {
     @Override
 	protected void setup() {
 		try {
-			addBehaviour(new CyclicBehaviour(this) {
+			addBehaviour(new OneShotBehaviour(this) {
 				private static final long serialVersionUID = 1L;
 				public void action() {
-					System.out.println("Done.");
+					ArrayList<ACLMessage> msgs = sendStartMessage();
+					for(int i = 0; i < Program.mobiles.size(); i++) {
+						myAgent.send(msgs.get(i));
+					}
 				}
 			});
 		} catch (Exception e) {
 			logger.log(Level.INFO, "Got an exception.", e);
 		}
+	}
+
+	protected ArrayList<ACLMessage> sendStartMessage() {
+		ArrayList<ACLMessage> messages = new ArrayList<>();
+		for (AID agentMobile : Program.mobiles) {
+			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+			msg.addReceiver(agentMobile);
+			msg.setContent("lanceur:start-ant");
+			messages.add(msg);
+		}
+		return messages;
 	}
     
 }
