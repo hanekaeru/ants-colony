@@ -15,8 +15,8 @@ public class Program extends Agent {
 	
 	int nb_nodes = 9; // 1 & 2 will always be information sources.
 	final static int NB_RECEVEURS = 2; // Il s'agit du nombre de noeuds qui n'auront pas de successeurs car ils contiennent l'informations.
-	final static int NB_AIGUILLEURS = 7; // Il s'agit du nombre d'arcs du graphe. 
-    final static int NB_COMPTEURS = 7; //
+	final static int NB_AIGUILLEURS = 9; // Il s'agit du nombre d'arcs du graphe. 
+    final static int NB_COMPTEURS = 5; //
 	final static int NB_MOBILES = 1; // Nombre d'agents de recherche. On peut en ajouter autant qu'on veut mais pour les tests.
 	final static int NB_LANCEURS = 1;
 	
@@ -66,32 +66,12 @@ public class Program extends Agent {
 				String localName = "agent_receveur_" + i + "_node";
 				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentReceveur", null);
 				guest.start();
-				receveurs.add(new AID(localName, AID.ISLOCALNAME));
-				agents.add(new AID(localName, AID.ISLOCALNAME));
+				AID newAgent = new AID(localName, AID.ISLOCALNAME);
+				receveurs.add(newAgent);
+				agents.add(newAgent);
 			}
 		} catch (Exception e) {
 			logger.log(Level.INFO, "Un problème est survenu lors de la mise en place des agents receveurs...", e);
-		}
-	}
-
-	/**
-	 * Création des agents aiguilleurs. Ils sont au nombre de 14 dans une configuration à 9 noeuds. Ce sont eux
-	 * qui vont permettre aux agents mobiles de pouvoir se diriger vers un autre noeud (si la configuration le
-	 * permet : n/2 et n/2+1) ou alors rentrer vers la base via le chemin qu'il a emprunté.
-	 */
-	protected void createAgentsAiguilleurs() {
-		logger.log(Level.INFO, "Creation {} agents aiguilleurs.", NB_AIGUILLEURS);
-		PlatformController container = getContainerController();
-		try {
-			for (int i = 1; i < NB_AIGUILLEURS + 1; i++) {
-				String localName = "agent_aiguilleurs_" + i + "_node";
-				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentAiguilleur", null);
-				guest.start();
-				aiguilleurs.add(new AID(localName, AID.ISLOCALNAME));
-				agents.add(new AID(localName, AID.ISLOCALNAME));
-			}
-		} catch (Exception e) {
-			logger.log(Level.INFO, "Un problème est survenu lors de la mise en place des agents aiguilleurs...", e);
 		}
 	}
 
@@ -108,8 +88,9 @@ public class Program extends Agent {
 				String localName = "agent_compteurs_" + i + "_node";
 				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentCompteur", null);
 				guest.start();
-				compteurs.add(new AID(localName, AID.ISLOCALNAME));
-				agents.add(new AID(localName, AID.ISLOCALNAME));
+				AID newAgent = new AID(localName, AID.ISLOCALNAME);
+				compteurs.add(newAgent);
+				agents.add(newAgent);
 			}
 		} catch (Exception e) {
 			logger.log(Level.INFO, "Un problème est survenu lors de la mise en place des agents compteurs...", e);
@@ -128,8 +109,9 @@ public class Program extends Agent {
 				String localName = "agent_mobile_" + i + "_node";
 				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentMobile", null);
 				guest.start();
-				mobiles.add(new AID(localName, AID.ISLOCALNAME));
-				agents.add(new AID(localName, AID.ISLOCALNAME));
+				AID newAgent = new AID(localName, AID.ISLOCALNAME);
+				mobiles.add(newAgent);
+				agents.add(newAgent);
 			}
 		} catch (Exception e) {
 			logger.log(Level.INFO, "Un problème est survenu lors de la mise en place des agents mobiles...", e);
@@ -144,12 +126,56 @@ public class Program extends Agent {
 				String localName = "agent_lanceur_" + i + "_node";
 				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentLanceur", null);
 				guest.start();
-				lanceurs.add(new AID(localName, AID.ISLOCALNAME));
-				agents.add(new AID(localName, AID.ISLOCALNAME));
+				AID newAgent = new AID(localName, AID.ISLOCALNAME);
+				lanceurs.add(newAgent);
+				agents.add(newAgent);
 			}
 		} catch (Exception e) {
 			logger.log(Level.INFO, "Un problème est survenu lors de la mise en place des agents lanceurs...", e);
 		}
+		
 	}
-	
+
+		/**
+	 * Création des agents aiguilleurs. Ils sont au nombre de 14 dans une configuration à 9 noeuds. Ce sont eux
+	 * qui vont permettre aux agents mobiles de pouvoir se diriger vers un autre noeud (si la configuration le
+	 * permet : n/2 et n/2+1) ou alors rentrer vers la base via le chemin qu'il a emprunté.
+	 */
+	protected void createAgentsAiguilleurs() {
+		logger.log(Level.INFO, "Creation {} agents aiguilleurs.", NB_AIGUILLEURS);
+		PlatformController container = getContainerController();
+		try {
+			for (int i = 1; i < NB_AIGUILLEURS + 1; i++) {
+				String localName = "agent_aiguilleurs_" + i + "_node";
+				ArrayList<Object> args = new ArrayList<>();
+				switch(i){
+					case 1:
+					case 2:
+						args.add("final");
+						break;
+					case 3:
+					case 4:
+						args.add("notFinal");
+						args.add(compteurs.get(0));
+						args.add(compteurs.get(0));
+
+				}
+				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentAiguilleur", args.toArray());
+				guest.start();
+				AID newAgent = new AID(localName, AID.ISLOCALNAME);
+				aiguilleurs.add(newAgent);
+				agents.add(newAgent);
+			}
+		} catch (Exception e) {
+			logger.log(Level.INFO, "Un problème est survenu lors de la mise en place des agents aiguilleurs...", e);
+		}
+	}
+
+	protected static AID findByLocalName(String localname){
+		for(AID ag : agents){
+			if(ag.getLocalName().equals(localname))
+				return ag;
+		}
+		return null;
+	}
 }

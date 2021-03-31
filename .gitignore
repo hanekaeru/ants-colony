@@ -11,3 +11,5 @@
 ants-colony.iml
 APDescription.txt
 MTPs-Main-Container.txt
+# Binaries files
+/bin/src/ants_colony/

@@ -13,8 +13,6 @@ public class AgentMobile extends Agent {
 
     private static final long serialVersionUID = 1L;
     private transient Logger logger = Logger.getLogger(AgentLanceur.class.getName());
-    private boolean goToInformation = false;
-
     private ArrayList<AID> chemin = new ArrayList<>();
     @Override
 	protected void setup() {
@@ -25,15 +23,26 @@ public class AgentMobile extends Agent {
 					ACLMessage msg = myAgent.receive();
                     // Traitement des messages reçus.
 					if(msg != null) {
-                        String prefix = msg.getContent().split(":")[0];
+                        String[] args = msg.getContent().split(":");
                         System.out.println("Name : " + myAgent.getAID().getLocalName() + " | Content : " + msg.getContent());
-                        switch (prefix) {
+                        switch (args[0]) {
+                            //reçoit "lanceur:{localname}" depuis AgentLanceur
                             case "lanceur":
-                                goToInformation = true;
+                                //envoie "mobile:forward" à AgentAiguilleur
+                                ACLMessage message = new ACLMessage(ACLMessage.INFORM);
+                                message.addReceiver(Program.findByLocalName(args[1]));
+                                message.setContent("mobile:forward");
+                                myAgent.send(message);
                                 break;
                             case "aiguilleur":
+                                
+                                ACLMessage message2 = new ACLMessage(ACLMessage.INFORM);
+                                message2.addReceiver(Program.findByLocalName(args[1]));
+                                message2.setContent("mobile:forward");
+                                myAgent.send(message2);
                                 break;
                             case "receveur":
+
                             
                                 break;
                             default:
@@ -41,12 +50,6 @@ public class AgentMobile extends Agent {
                         }
                         
 					}
-                    if(goToInformation) {
-                        // Liaison avec agent aiguilleur.
-
-                    } else {
-                        // Attendre le message.
-                    }
 				}
 			});
 		} catch (Exception e) {

@@ -24,7 +24,7 @@ public class AgentCompteur extends Agent {
 					String[] args = msg.getContent().split(":");
 					switch(args[1]){
 						//reçoit aiguilleur:get depuis Aiguilleur
-						case "get": // Bah écoute ça va
+						case "get": 
 							ACLMessage response = new ACLMessage(ACLMessage.INFORM);
 							response.addReceiver(msg.getSender());
 							response.setContent("compteur:"+((AgentCompteur) myAgent).pheromone);

@@ -13,11 +13,15 @@ public class AgentAiguilleur extends Agent {
 
     private static final long serialVersionUID = 1L;
     private transient Logger logger = Logger.getLogger(AgentLanceur.class.getName());
-
+	
     private ArrayList<AID> associateCompteurs;
 
+	public boolean noeudFinal = false;
     @Override
 	protected void setup() {
+		Object[] args = getArguments();
+
+		System.out.println((String) args[0]);
 		try {
 			addBehaviour(new CyclicBehaviour(this) {
 				private static final long serialVersionUID = 1L;
@@ -42,7 +46,7 @@ public class AgentAiguilleur extends Agent {
 									case "backward":
 										//envoie aiguilleur:inc à AgentCompteur
 										ACLMessage increment = new ACLMessage(ACLMessage.INFORM);
-										increment.addReceiver(((AgentAiguilleur) myAgent).findByLocalName(args[2]));
+										increment.addReceiver(Program.findByLocalName(args[2]));
 										increment.setContent("aiguilleur:inc");
 										myAgent.send(increment);
 										break;
@@ -51,7 +55,7 @@ public class AgentAiguilleur extends Agent {
 									case "notfound":
 										//envoie aiguilleur:dec à AgentCompteur
 										ACLMessage decrement = new ACLMessage(ACLMessage.INFORM);
-										decrement.addReceiver(((AgentAiguilleur) myAgent).findByLocalName(args[2]));
+										decrement.addReceiver(Program.findByLocalName(args[2]));
 										decrement.setContent("aiguilleur:dec");
 										myAgent.send(decrement);
 										
@@ -79,14 +83,6 @@ public class AgentAiguilleur extends Agent {
 	
 	protected List<AID> getAssociateCompteurs() {
 	    return this.associateCompteurs;
-	}
-
-	protected AID findByLocalName(String localname){
-		for(AID ag : this.associateCompteurs){
-			if(ag.getLocalName().equals(localname))
-				return ag;
-		}
-		return null;
 	}
 
 	protected AID selectHost(){
