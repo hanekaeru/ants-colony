@@ -42,7 +42,7 @@ public class AgentAiguilleur extends Agent {
 									case "backward":
 										//envoie aiguilleur:inc à AgentCompteur
 										ACLMessage increment = new ACLMessage(ACLMessage.INFORM);
-										increment.addReceiver((AgentAiguilleur myAgent).findByLocalname(args[2]));
+										increment.addReceiver(((AgentAiguilleur) myAgent).findByLocalName(args[2]));
 										increment.setContent("aiguilleur:inc");
 										myAgent.send(increment);
 										break;
@@ -51,9 +51,9 @@ public class AgentAiguilleur extends Agent {
 									case "notfound":
 										//envoie aiguilleur:dec à AgentCompteur
 										ACLMessage decrement = new ACLMessage(ACLMessage.INFORM);
-										decrement.addReceiver((AgentAiguilleur myAgent).findByLocalName(args[2]));
-										decrement.setContent("aiguilleur:dec")
-										myAgent.send(increment);
+										decrement.addReceiver(((AgentAiguilleur) myAgent).findByLocalName(args[2]));
+										decrement.setContent("aiguilleur:dec");
+										myAgent.send(decrement);
 										
 										// Ce cas est chiant
 										break;
@@ -86,6 +86,7 @@ public class AgentAiguilleur extends Agent {
 			if(ag.getLocalName().equals(localname))
 				return ag;
 		}
+		return null;
 	}
 
 	protected AID selectHost(){
@@ -114,7 +115,6 @@ public class AgentAiguilleur extends Agent {
 					}
 				}
 			}else{ 
-				//
 				for(AID ag : this.associateCompteurs){
 					if(	ag.equals( response2.getSender() ) ){
 						return ag;
@@ -122,6 +122,7 @@ public class AgentAiguilleur extends Agent {
 				}
 			}
 		}
+		return null;
 	}
     
        

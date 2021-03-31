@@ -2,6 +2,8 @@ package src.ants_colony;
 
 import jade.core.Agent;
 import jade.core.behaviours.*;
+import jade.lang.acl.ACLMessage;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,16 +25,16 @@ public class AgentCompteur extends Agent {
 					switch(args[1]){
 						//reçoit aiguilleur:get depuis Aiguilleur
 						case "get": // Bah écoute ça va
-							ACLMessage response = new ACLMessage(ACLMessage.INFO);
+							ACLMessage response = new ACLMessage(ACLMessage.INFORM);
 							response.addReceiver(msg.getSender());
-							response.addContent("compteur:"+(AgentCompteur myAgent).pheromone);
+							response.setContent("compteur:"+((AgentCompteur) myAgent).pheromone);
 							myAgent.send(response);
 							break;
 						case "inc":
-							(AgentCompteur myAgent).pheromone++;
+							((AgentCompteur) myAgent).pheromone++;
 							break;
 						case "dec":
-							(AgentCompteur myAgent).pheromone--;
+							((AgentCompteur) myAgent).pheromone--;
 							break;
 						default:
 							break;
