@@ -4,8 +4,9 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,13 +15,34 @@ public class AgentAiguilleur extends Agent {
     private static final long serialVersionUID = 1L;
     private transient Logger logger = Logger.getLogger(AgentLanceur.class.getName());
 	
-    private ArrayList<AID> associateCompteurs;
+    private AID associateCompteur;
 
-	public boolean noeudFinal = false;
+	private ArrayList<AID> nextAiguilleurs;
+
+	public String type;
     @Override
 	protected void setup() {
 		Object[] args = getArguments();
-
+		switch((String) args[0]){
+			case "final":
+				this.type = "final";
+				this.associateCompteur = (AID) args[1];
+				break;
+			case "notFinal":
+				this.type = "notFinal";
+				this.associateCompteur = (AID) args[1];
+				for(int i=2; i<args.length;i++){
+					nextAiguilleurs.add((AID) args[i]);
+				}
+				break;
+			case "initial":
+				this.type = "initial";
+				this.associateCompteur = null;
+				for(int i=1; i<args.length;i++){
+					nextAiguilleurs.add((AID) args[i]);
+				}
+				break;
+		}
 		System.out.println((String) args[0]);
 		try {
 			addBehaviour(new CyclicBehaviour(this) {
@@ -65,6 +87,24 @@ public class AgentAiguilleur extends Agent {
 										break;
 								}
 								break;
+							case "aiguilleur":
+								switch(args[1]){
+									case "getvaluecompteur":
+										ACLMessage msgToCompteur = new ACLMessage(ACLMessage.INFORM);
+										msgToCompteur.setContent("aiguilleur:get");
+										msgToCompteur.addReceiver(((AgentAiguilleur) myAgent).associateCompteur);
+										myAgent.send(msgToCompteur);
+
+										ACLMessage responseFromCompteur = blockingReceive(MessageTemplate.MatchSender(((AgentAiguilleur) myAgent).associateCompteur));
+										
+										ACLMessage msgToAiguilleur = new ACLMessage(ACLMessage.INFORM);
+										msgToAiguilleur.setContent("aiguilleur:" + responseFromCompteur.getContent().split(":")[1]);
+										msgToAiguilleur.addReceiver(msg.getSender());
+										myAgent.send(msgToAiguilleur);
+										
+										break;
+									case "":
+								}
 							default:
 								break;
 						}						
@@ -76,42 +116,40 @@ public class AgentAiguilleur extends Agent {
 			logger.log(Level.INFO, "Got an exception.", e);
 		}
 	}
+
 	
-	protected void addAssociateCompteurs(AID host){
-	    this.associateCompteurs.add(host);
-	}
-	
-	protected List<AID> getAssociateCompteurs() {
-	    return this.associateCompteurs;
+	protected AID getAssociateCompteur() {
+	    return this.associateCompteur;
 	}
 
 	protected AID selectHost(){
-		//Envoie aiguilleur:get à AgentCompteur
-		for(AID ag : this.associateCompteurs){
+		//Envoie aiguilleur:getvaluecompteur à AgentAiguilleur
+		for(AID ag : this.nextAiguilleurs){
 			ACLMessage msgToCompteurs = new ACLMessage(ACLMessage.INFORM);
-			msgToCompteurs.setContent("aiguilleur:get");
+			msgToCompteurs.setContent("aiguilleur:getvaluecompteur");
 			msgToCompteurs.addReceiver(ag);
 			this.send(msgToCompteurs);
 		}
-		//Reçoit deux messages compteur:{valeurpheromone}
-		
-		ACLMessage response1 = this.receive();
-		ACLMessage response2 = this.receive();
+		//Reçoit deux messages aiguilleur:{valeurpheromone}
+
+		ACLMessage response1 = this.blockingReceive(MessageTemplate.MatchSender(this.nextAiguilleurs.get(0)));
+		ACLMessage response2 = this.blockingReceive(MessageTemplate.MatchSender(this.nextAiguilleurs.get(1)));
 		
 		String[] args1 = response1.getContent().split(":");
 		String[] args2 = response2.getContent().split(":");
 		if(args1[0].equals(args2[0]) && args1[0].equals("compteur")){
+			
 			int val1 = Integer.parseInt(args1[1]);
 			int val2 = Integer.parseInt(args2[1]);
 
 			if(val1 > val2){
-				for(AID ag : this.associateCompteurs){
+				for(AID ag : this.nextAiguilleurs){
 					if( ag.equals( response1.getSender() ) ){
 						return ag;
 					}
 				}
 			}else{ 
-				for(AID ag : this.associateCompteurs){
+				for(AID ag : this.nextAiguilleurs){
 					if(	ag.equals( response2.getSender() ) ){
 						return ag;
 					}

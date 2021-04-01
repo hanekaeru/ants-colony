@@ -35,10 +35,10 @@ public class Program extends Agent {
 			logger.log(Level.INFO, " {} setting up", getLocalName());
 
 			createAgentsReceveurs();
-			createAgentsAiguilleurs();
 			createAgentsCompteurs();
 			createAgentsMobiles();
 			createAgentsLanceurs();
+			createAgentsAiguilleurs();
 
 			addBehaviour(new CyclicBehaviour(this) {
 				private static final long serialVersionUID = 1L;
@@ -59,7 +59,7 @@ public class Program extends Agent {
 	 * agent mobile est arrivé ici, il va devoir créer des "phéromones".
 	 */
     protected void createAgentsReceveurs() {
-		logger.log(Level.INFO, "Creation {} agents receveurs.", NB_RECEVEURS);
+		logger.log(Level.INFO, "Creation "+ NB_RECEVEURS + " agents receveurs.");
 		PlatformController container = getContainerController();
 		try {
 			for (int i = 1; i < NB_RECEVEURS + 1; i++) {
@@ -152,13 +152,27 @@ public class Program extends Agent {
 					case 1:
 					case 2:
 						args.add("final");
+						args.add(compteurs.get(i-1));
 						break;
 					case 3:
 					case 4:
+					case 5:
 						args.add("notFinal");
-						args.add(compteurs.get(0));
-						args.add(compteurs.get(0));
-
+						args.add(compteurs.get(i-1));
+						args.add(aiguilleurs.get(0));
+						args.add(aiguilleurs.get(1));
+						break;
+					case 6:
+					case 7:
+						args.add("initial");
+						args.add(aiguilleurs.get(2));
+						args.add(aiguilleurs.get(3));
+						break;
+					case 8:
+					case 9:
+						args.add("initial");
+						args.add(aiguilleurs.get(3));
+						args.add(aiguilleurs.get(4));
 				}
 				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentAiguilleur", args.toArray());
 				guest.start();
