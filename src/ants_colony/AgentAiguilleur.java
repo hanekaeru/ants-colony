@@ -14,36 +14,40 @@ public class AgentAiguilleur extends Agent {
 
     private static final long serialVersionUID = 1L;
     private transient Logger logger = Logger.getLogger(AgentLanceur.class.getName());
-	
+	 
     private AID associateCompteur;
 
-	private ArrayList<AID> nextAiguilleurs;
+	private ArrayList<AID> nextAiguilleurs = new ArrayList<>();
 
 	public String type;
     @Override
 	protected void setup() {
 		Object[] args = getArguments();
+
 		switch((String) args[0]){
 			case "final":
 				this.type = "final";
-				this.associateCompteur = (AID) args[1];
+				this.associateCompteur = Program.findByLocalName((String) args[1]);
 				break;
 			case "notFinal":
 				this.type = "notFinal";
-				this.associateCompteur = (AID) args[1];
-				for(int i=2; i<args.length;i++){
-					nextAiguilleurs.add((AID) args[i]);
-				}
+				this.associateCompteur = Program.findByLocalName((String) args[1]);
+				for(int i=2; i<args.length;i++){ 
+					if(args.length > i){
+						nextAiguilleurs.add(Program.findByLocalName((String) args[i])); 
+					}
+				} 
 				break;
-			case "initial":
+			case "initial": 
 				this.type = "initial";
 				this.associateCompteur = null;
 				for(int i=1; i<args.length;i++){
-					nextAiguilleurs.add((AID) args[i]);
+					if(args.length>i){
+						nextAiguilleurs.add(Program.findByLocalName((String) args[i])); // Ici ca merde
+					}				
 				}
 				break;
 		}
-		System.out.println((String) args[0]);
 		try {
 			addBehaviour(new CyclicBehaviour(this) {
 				private static final long serialVersionUID = 1L;
@@ -54,7 +58,7 @@ public class AgentAiguilleur extends Agent {
 						String[] args = msg.getContent().split(":");
 						switch(args[0]){
 							case "mobile" : 
-								switch(args[1]){
+								switch(args[1]){ 
 									//reçoit mobile:forward de AgentMobile
 									case "forward":
 										// envoie aiguilleur:{localname} à AgentMobile
@@ -81,7 +85,7 @@ public class AgentAiguilleur extends Agent {
 										decrement.setContent("aiguilleur:dec");
 										myAgent.send(decrement);
 										
-										// Ce cas est chiant
+										// Ce cas est chiant 
 										break;
 									default:
 										break;

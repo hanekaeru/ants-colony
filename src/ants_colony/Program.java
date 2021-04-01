@@ -28,18 +28,17 @@ public class Program extends Agent {
 	public static ArrayList<AID> agents = new ArrayList<>(); 
 
 	private transient Logger logger = Logger.getLogger(Program.class.getName());
-
+	
     @Override
 	protected void setup() {
 		try {
-			logger.log(Level.INFO, " {} setting up", getLocalName());
-
-			createAgentsReceveurs();
-			createAgentsCompteurs();
+			logger.log(Level.INFO, getLocalName() + " setting up");
 			createAgentsMobiles();
-			createAgentsLanceurs();
+			createAgentsReceveurs();
+			createAgentsCompteurs(); 
 			createAgentsAiguilleurs();
-
+			createAgentsLanceurs();
+			
 			addBehaviour(new CyclicBehaviour(this) {
 				private static final long serialVersionUID = 1L;
 				@Override
@@ -81,7 +80,7 @@ public class Program extends Agent {
 	 * celui-ci va activer des "phéromones" afin d'indiquer que le chemin menant à la source d'informations est ici.
 	 */
 	protected void createAgentsCompteurs() {
-		logger.log(Level.INFO, "Creation {} agents compteurs.", NB_COMPTEURS);
+		logger.log(Level.INFO, "Creation " + NB_COMPTEURS + " agents compteurs.");
 		PlatformController container = getContainerController();
 		try {
 			for (int i = 1; i < NB_COMPTEURS + 1; i++) {
@@ -102,7 +101,7 @@ public class Program extends Agent {
 	 * en ajouter facilement. 
 	 */
 	protected void createAgentsMobiles() {
-		logger.log(Level.INFO, "Creation {} agents mobiles.", NB_MOBILES);
+		logger.log(Level.INFO, "Creation "+ NB_MOBILES + " agents mobiles.");
 		PlatformController container = getContainerController();
 		try {
 			for (int i = 1; i < NB_MOBILES + 1; i++) {
@@ -119,12 +118,13 @@ public class Program extends Agent {
 	}
 
 	protected void createAgentsLanceurs() {
-		logger.log(Level.INFO, "Creation {} agents lanceurs.", NB_LANCEURS);
+		logger.log(Level.INFO, "Creation "+ NB_LANCEURS + " agents lanceurs.");
 		PlatformController container = getContainerController();
 		try {
 			for (int i = 1; i < NB_LANCEURS + 1; i++) {
 				String localName = "agent_lanceur_" + i + "_node";
-				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentLanceur", null);
+				Object[] args = {Program.aiguilleurs.get(5).getLocalName()};
+				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentLanceur", args); //On lance l'agent mobile depuis le 6e neud
 				guest.start();
 				AID newAgent = new AID(localName, AID.ISLOCALNAME);
 				lanceurs.add(newAgent);
@@ -142,7 +142,7 @@ public class Program extends Agent {
 	 * permet : n/2 et n/2+1) ou alors rentrer vers la base via le chemin qu'il a emprunté.
 	 */
 	protected void createAgentsAiguilleurs() {
-		logger.log(Level.INFO, "Creation {} agents aiguilleurs.", NB_AIGUILLEURS);
+		logger.log(Level.INFO, "Creation " + NB_AIGUILLEURS + " agents aiguilleurs.");
 		PlatformController container = getContainerController();
 		try {
 			for (int i = 1; i < NB_AIGUILLEURS + 1; i++) {
@@ -152,27 +152,27 @@ public class Program extends Agent {
 					case 1:
 					case 2:
 						args.add("final");
-						args.add(compteurs.get(i-1));
+						args.add(compteurs.get(i-1).getLocalName());
 						break;
 					case 3:
 					case 4:
 					case 5:
 						args.add("notFinal");
-						args.add(compteurs.get(i-1));
-						args.add(aiguilleurs.get(0));
-						args.add(aiguilleurs.get(1));
+						args.add(compteurs.get(i-1).getLocalName());
+						args.add(aiguilleurs.get(0).getLocalName());
+						args.add(aiguilleurs.get(1).getLocalName());
 						break;
 					case 6:
 					case 7:
 						args.add("initial");
-						args.add(aiguilleurs.get(2));
-						args.add(aiguilleurs.get(3));
+						args.add(aiguilleurs.get(2).getLocalName());
+						args.add(aiguilleurs.get(3).getLocalName());
 						break;
 					case 8:
 					case 9:
 						args.add("initial");
-						args.add(aiguilleurs.get(3));
-						args.add(aiguilleurs.get(4));
+						args.add(aiguilleurs.get(3).getLocalName());
+						args.add(aiguilleurs.get(4).getLocalName());
 				}
 				AgentController guest = container.createNewAgent(localName, "src.ants_colony.AgentAiguilleur", args.toArray());
 				guest.start();
@@ -187,7 +187,7 @@ public class Program extends Agent {
 
 	protected static AID findByLocalName(String localname){
 		for(AID ag : agents){
-			if(ag.getLocalName().equals(localname))
+			if(ag.getLocalName().equals(localname)) // 
 				return ag;
 		}
 		return null;

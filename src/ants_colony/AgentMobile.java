@@ -22,7 +22,7 @@ public class AgentMobile extends Agent {
 				public void action() {
 					ACLMessage msg = myAgent.receive();
                     // Traitement des messages reçus.
-					if(msg != null) {
+					if(msg != null) { 
                         String[] args = msg.getContent().split(":");
                         System.out.println("Name : " + myAgent.getAID().getLocalName() + " | Content : " + msg.getContent());
                         switch (args[0]) {

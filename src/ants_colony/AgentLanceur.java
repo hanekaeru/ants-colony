@@ -14,8 +14,11 @@ public class AgentLanceur extends Agent {
     private static final long serialVersionUID = 1L;
     private transient Logger logger = Logger.getLogger(AgentLanceur.class.getName());
 
+	private AID associatedAiguilleur;
     @Override
 	protected void setup() {
+		Object[] args = getArguments(); 
+		associatedAiguilleur = Program.findByLocalName((String) args[0]);
 		try {
 			addBehaviour(new OneShotBehaviour(this) {
 				private static final long serialVersionUID = 1L;

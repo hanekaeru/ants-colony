@@ -17,29 +17,32 @@ public class AgentCompteur extends Agent {
     @Override
 	protected void setup() {
 		try {
-			addBehaviour(new OneShotBehaviour(this) {
+			addBehaviour(new CyclicBehaviour(this) {
 				private static final long serialVersionUID = 1L;
 				public void action() {
 					ACLMessage msg = myAgent.receive();
-					String[] args = msg.getContent().split(":");
-					switch(args[1]){
-						//reçoit aiguilleur:get depuis Aiguilleur
-						case "get": 
-							ACLMessage response = new ACLMessage(ACLMessage.INFORM);
-							response.addReceiver(msg.getSender());
-							response.setContent("compteur:"+((AgentCompteur) myAgent).pheromone);
-							myAgent.send(response);
-							break;
-						case "inc":
-							((AgentCompteur) myAgent).pheromone++;
-							break;
-						case "dec":
-							((AgentCompteur) myAgent).pheromone--;
-							break;
-						default:
-							break;
+					if(msg!=null){
+						String[] args = msg.getContent().split(":");
+						switch(args[1]){
+							//reçoit aiguilleur:get depuis Aiguilleur
+							case "get": 
+								ACLMessage response = new ACLMessage(ACLMessage.INFORM);
+								response.addReceiver(msg.getSender());
+								response.setContent("compteur:"+((AgentCompteur) myAgent).pheromone);
+								myAgent.send(response);
+								break;
+							case "inc":
+								((AgentCompteur) myAgent).pheromone++;
+								break;
+							case "dec":
+								((AgentCompteur) myAgent).pheromone--;
+								break;
+							default:
+								break;
+						}
+						
+						
 					}
-					
 					
 				}
 			});
