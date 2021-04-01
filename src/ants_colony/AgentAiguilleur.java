@@ -19,7 +19,10 @@ public class AgentAiguilleur extends Agent {
 
 	private ArrayList<AID> nextAiguilleurs = new ArrayList<>();
 
-	public String type;
+	private AID associateReceveur;
+	
+	private String type;
+
     @Override
 	protected void setup() {
 		Object[] args = getArguments();
@@ -28,6 +31,7 @@ public class AgentAiguilleur extends Agent {
 			case "final":
 				this.type = "final";
 				this.associateCompteur = Program.findByLocalName((String) args[1]);
+				this.associateReceveur = Program.findByLocalName((String) args[2]);
 				break;
 			case "notFinal":
 				this.type = "notFinal";
@@ -43,7 +47,7 @@ public class AgentAiguilleur extends Agent {
 				this.associateCompteur = null;
 				for(int i=1; i<args.length;i++){
 					if(args.length>i){
-						nextAiguilleurs.add(Program.findByLocalName((String) args[i])); // Ici ca merde
+						nextAiguilleurs.add(Program.findByLocalName((String) args[i]));
 					}				
 				}
 				break;
@@ -55,59 +59,92 @@ public class AgentAiguilleur extends Agent {
 					ACLMessage msg = myAgent.receive();
 					
 					if(msg != null){
+						AgentAiguilleur agentAiguilleur = (AgentAiguilleur) myAgent;
+						logger.log(Level.INFO, agentAiguilleur.getLocalName() + " recoit un message de " + msg.getSender().getLocalName() + " contenant : " + msg.getContent());
 						String[] args = msg.getContent().split(":");
 						switch(args[0]){
 							case "mobile" : 
 								switch(args[1]){ 
 									//reçoit mobile:forward de AgentMobile
 									case "forward":
-										// envoie aiguilleur:{localname} à AgentMobile
-										ACLMessage response = new ACLMessage(ACLMessage.INFORM);
-										response.addReceiver(msg.getSender());
-										response.setContent("aiguilleur:"+((AgentAiguilleur) myAgent).selectHost().getLocalName());
-										myAgent.send(response);
+										
+										if(agentAiguilleur.type.equals("final")){
+											// envoie aiguilleur:end:{localname} à AgentMobile
+											ACLMessage response = new ACLMessage(ACLMessage.INFORM);
+											response.addReceiver(msg.getSender());
+											response.setContent("aiguilleur:end:"+agentAiguilleur.associateReceveur.getLocalName());
+											myAgent.send(response);
+										}else{
+											// envoie aiguilleur:{localname} à AgentMobile
+											ACLMessage response = new ACLMessage(ACLMessage.INFORM);
+											response.addReceiver(msg.getSender());
+											response.setContent("aiguilleur:"+agentAiguilleur.selectHost().getLocalName());
+											myAgent.send(response);
+										}
+
 										break; 
 
 									//reçoit mobile:backward:{localname} de AgentMobile
 									case "backward":
-										//envoie aiguilleur:inc à AgentCompteur
-										ACLMessage increment = new ACLMessage(ACLMessage.INFORM);
-										increment.addReceiver(Program.findByLocalName(args[2]));
-										increment.setContent("aiguilleur:inc");
-										myAgent.send(increment);
+										if(agentAiguilleur.type.equals("initial")){
+											//Envoie "aiguilleur:finish" à AgentMobile
+											ACLMessage msgToMobile = msg.createReply();
+											msgToMobile.setContent("aiguilleur:finish");
+											myAgent.send(msgToMobile);
+										}else {
+											//Envoie "aiguilleur:inc" à AgentCompteur
+											ACLMessage msgToIncCompteur = new ACLMessage(ACLMessage.INFORM);
+											msgToIncCompteur.setContent("aiguilleur:inc");
+											msgToIncCompteur.addReceiver(agentAiguilleur.associateCompteur);
+											myAgent.send(msgToIncCompteur);
+
+											//envoie aiguilleur:go à AgentMobile
+											ACLMessage responseToMobile = msg.createReply();
+											responseToMobile.setContent("aiguilleur:go");
+											myAgent.send(responseToMobile);
+										}
 										break;
+
+
 
 									//reçoit mobile:notfound:{localname}
 									case "notfound":
+
 										//envoie aiguilleur:dec à AgentCompteur
-										ACLMessage decrement = new ACLMessage(ACLMessage.INFORM);
-										decrement.addReceiver(Program.findByLocalName(args[2]));
-										decrement.setContent("aiguilleur:dec");
-										myAgent.send(decrement);
-										
-										// Ce cas est chiant 
+										ACLMessage msgToDecCompteur = new ACLMessage(ACLMessage.INFORM);
+										msgToDecCompteur.setContent("aiguilleur:dec");
+										msgToDecCompteur.addReceiver(agentAiguilleur.associateCompteur);
+										myAgent.send(msgToDecCompteur);
+
+										//envoie aiguilleur:go à AgentMobile
+										ACLMessage responseToMobileNotFound = msg.createReply();
+										responseToMobileNotFound.setContent("aiguilleur:go");
+										myAgent.send(responseToMobileNotFound);
 										break;
+
 									default:
 										break;
 								}
 								break;
 							case "aiguilleur":
 								switch(args[1]){
+									//Reçoit "aiguilleur:getvaluecompteur" depuis AgentAiguilleur
 									case "getvaluecompteur":
+										//Envoie "aiguilleur:get" à AgentCompteur
 										ACLMessage msgToCompteur = new ACLMessage(ACLMessage.INFORM);
 										msgToCompteur.setContent("aiguilleur:get");
-										msgToCompteur.addReceiver(((AgentAiguilleur) myAgent).associateCompteur);
+										msgToCompteur.addReceiver(agentAiguilleur.associateCompteur);
 										myAgent.send(msgToCompteur);
 
-										ACLMessage responseFromCompteur = blockingReceive(MessageTemplate.MatchSender(((AgentAiguilleur) myAgent).associateCompteur));
+										//Reçoit "compteur:{valeurpheromone}" depuis AgentCompteur
+										ACLMessage responseFromCompteur = blockingReceive(MessageTemplate.MatchSender(agentAiguilleur.associateCompteur));
 										
+										//Envoit "aiguilleur:{valeurpheromone}" à AgentAiguilleur
 										ACLMessage msgToAiguilleur = new ACLMessage(ACLMessage.INFORM);
 										msgToAiguilleur.setContent("aiguilleur:" + responseFromCompteur.getContent().split(":")[1]);
 										msgToAiguilleur.addReceiver(msg.getSender());
 										myAgent.send(msgToAiguilleur);
-										
 										break;
-									case "":
 								}
 							default:
 								break;
@@ -121,7 +158,15 @@ public class AgentAiguilleur extends Agent {
 		}
 	}
 
-	
+	protected AID findNextAiguilleurByLocalName(String localname){
+		for(AID ag : this.nextAiguilleurs){
+			if(ag.getLocalName().equals(localname)){
+				return ag;
+			}
+		}
+		return null;
+	}
+
 	protected AID getAssociateCompteur() {
 	    return this.associateCompteur;
 	}
@@ -137,11 +182,13 @@ public class AgentAiguilleur extends Agent {
 		//Reçoit deux messages aiguilleur:{valeurpheromone}
 
 		ACLMessage response1 = this.blockingReceive(MessageTemplate.MatchSender(this.nextAiguilleurs.get(0)));
+		logger.log(Level.INFO, this.getLocalName() + " recoit un message de " + response1.getSender().getLocalName() + " contenant : " + response1.getContent());
 		ACLMessage response2 = this.blockingReceive(MessageTemplate.MatchSender(this.nextAiguilleurs.get(1)));
-		
+		logger.log(Level.INFO, this.getLocalName() + " recoit un message de " + response2.getSender().getLocalName() + " contenant : " + response2.getContent());
+
 		String[] args1 = response1.getContent().split(":");
 		String[] args2 = response2.getContent().split(":");
-		if(args1[0].equals(args2[0]) && args1[0].equals("compteur")){
+		if(args1[0].equals(args2[0]) && args1[0].equals("aiguilleur")){
 			
 			int val1 = Integer.parseInt(args1[1]);
 			int val2 = Integer.parseInt(args2[1]);

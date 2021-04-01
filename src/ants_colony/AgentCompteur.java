@@ -22,6 +22,8 @@ public class AgentCompteur extends Agent {
 				public void action() {
 					ACLMessage msg = myAgent.receive();
 					if(msg!=null){
+						AgentCompteur agentCompteur = (AgentCompteur) myAgent;
+						logger.log(Level.INFO, agentCompteur.getLocalName() + " recoit un message de " + msg.getSender().getLocalName() + " contenant : " + msg.getContent());
 						String[] args = msg.getContent().split(":");
 						switch(args[1]){
 							//reçoit aiguilleur:get depuis Aiguilleur

@@ -153,6 +153,7 @@ public class Program extends Agent {
 					case 2:
 						args.add("final");
 						args.add(compteurs.get(i-1).getLocalName());
+						args.add(receveurs.get(i-1).getLocalName());
 						break;
 					case 3:
 					case 4:

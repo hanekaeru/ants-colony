@@ -25,6 +25,7 @@ public class AgentLanceur extends Agent {
 				public void action() {
 					ArrayList<ACLMessage> msgs = sendStartMessage();
 					for(int i = 0; i < Program.mobiles.size(); i++) {
+						//Envoie lanceur:{Aiguilleur_localname} à tous les Agents Mobiles.
 						myAgent.send(msgs.get(i));
 					}
 				}
@@ -39,7 +40,7 @@ public class AgentLanceur extends Agent {
 		for (AID agentMobile : Program.mobiles) {
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver(agentMobile);
-			msg.setContent("lanceur:start-ant");
+			msg.setContent("lanceur:"+associatedAiguilleur.getLocalName());
 			messages.add(msg);
 		}
 		return messages;
