@@ -181,9 +181,7 @@ public class AgentAiguilleur extends Agent {
 		//Reçoit deux messages aiguilleur:{valeurpheromone}
 
 		ACLMessage response1 = this.blockingReceive(MessageTemplate.MatchSender(this.nextAiguilleurs.get(0)));
-		logger.log(Level.INFO, this.getLocalName() + " recoit un message de " + response1.getSender().getLocalName() + " contenant : " + response1.getContent());
 		ACLMessage response2 = this.blockingReceive(MessageTemplate.MatchSender(this.nextAiguilleurs.get(1)));
-		logger.log(Level.INFO, this.getLocalName() + " recoit un message de " + response2.getSender().getLocalName() + " contenant : " + response2.getContent());
 
 		String[] args1 = response1.getContent().split(":");
 		String[] args2 = response2.getContent().split(":");

@@ -25,7 +25,6 @@ public class AgentReceveur extends Agent {
 					ACLMessage msg = myAgent.receive();
 					if(msg!=null){
 						AgentReceveur agentReceveur = (AgentReceveur) myAgent;
-						logger.log(Level.INFO, agentReceveur.getLocalName() + " recoit un message de " + msg.getSender().getLocalName() + " contenant : " + msg.getContent());
 						String[] args = msg.getContent().split(":");
 						//Reçoit mobile:get depuis AgentMobile
 						if(args[0].equals("mobile") && args[1].equals("get")){
