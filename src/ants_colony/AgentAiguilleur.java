@@ -60,7 +60,6 @@ public class AgentAiguilleur extends Agent {
 					
 					if(msg != null){
 						AgentAiguilleur agentAiguilleur = (AgentAiguilleur) myAgent;
-						logger.log(Level.INFO, agentAiguilleur.getLocalName() + " recoit un message de " + msg.getSender().getLocalName() + " contenant : " + msg.getContent());
 						String[] args = msg.getContent().split(":");
 						switch(args[0]){
 							case "mobile" : 
@@ -192,14 +191,19 @@ public class AgentAiguilleur extends Agent {
 			
 			int val1 = Integer.parseInt(args1[1]);
 			int val2 = Integer.parseInt(args2[1]);
+			val1++;
+			val2++;
 
-			if(val1 > val2){
+			double somme = val1 + val2;
+
+			double randomValue = Math.random();
+			if(randomValue <= ((double)val1/somme)){
 				for(AID ag : this.nextAiguilleurs){
 					if( ag.equals( response1.getSender() ) ){
 						return ag;
 					}
 				}
-			}else{ 
+			}else{
 				for(AID ag : this.nextAiguilleurs){
 					if(	ag.equals( response2.getSender() ) ){
 						return ag;

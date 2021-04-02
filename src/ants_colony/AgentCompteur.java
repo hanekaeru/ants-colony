@@ -23,21 +23,20 @@ public class AgentCompteur extends Agent {
 					ACLMessage msg = myAgent.receive();
 					if(msg!=null){
 						AgentCompteur agentCompteur = (AgentCompteur) myAgent;
-						logger.log(Level.INFO, agentCompteur.getLocalName() + " recoit un message de " + msg.getSender().getLocalName() + " contenant : " + msg.getContent());
 						String[] args = msg.getContent().split(":");
 						switch(args[1]){
 							//reçoit aiguilleur:get depuis Aiguilleur
 							case "get": 
 								ACLMessage response = new ACLMessage(ACLMessage.INFORM);
 								response.addReceiver(msg.getSender());
-								response.setContent("compteur:"+((AgentCompteur) myAgent).pheromone);
+								response.setContent("compteur:"+ agentCompteur.pheromone);
 								myAgent.send(response);
 								break;
 							case "inc":
-								((AgentCompteur) myAgent).pheromone++;
+								agentCompteur.pheromone++;
 								break;
 							case "dec":
-								((AgentCompteur) myAgent).pheromone--;
+								agentCompteur.pheromone--;
 								break;
 							default:
 								break;

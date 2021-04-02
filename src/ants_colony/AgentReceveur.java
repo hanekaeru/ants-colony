@@ -16,7 +16,8 @@ public class AgentReceveur extends Agent {
 
     @Override
 	protected void setup() {
-		this.information = "2+2=4";
+		Object[] args = getArguments();
+		this.information = (String) args[0];
 		try {
 			addBehaviour(new CyclicBehaviour(this) {
 				private static final long serialVersionUID = 1L;
