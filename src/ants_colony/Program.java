@@ -64,14 +64,8 @@ public class Program extends Agent {
 			for (int i = 1; i < NB_RECEVEURS + 1; i++) {
 				String localName = "agent_receveur_" + i + "_node";
 				AgentController guest;
-				if(i==1){
-					Object[] args = {"notfound"};
-					guest = container.createNewAgent(localName, "src.ants_colony.AgentReceveur", args);
-
-				}else{
-					Object[] args = {"2+2=4"};
-					guest = container.createNewAgent(localName, "src.ants_colony.AgentReceveur", args);
-				}
+				Object[] args = {"2+2=4"};
+				guest = container.createNewAgent(localName, "src.ants_colony.AgentReceveur", args);
 				guest.start();
 				AID newAgent = new AID(localName, AID.ISLOCALNAME);
 				receveurs.add(newAgent);
